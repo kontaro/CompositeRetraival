@@ -47,9 +47,9 @@ public class main {
         //de manera que se puedan correr varias pruebas a la vez
         float[] ganmas={(float) 0.5};
         int[] presupuestos= {50}; 
-        int[] funcions= {1,2}; 
+        int[] funcions= {2}; 
         int kpaquetes=10;//cantidad de paquetes
-        int iter=10;
+        int iter=30;
         int ciudad;
         long CHAC_Tiempo=20000;
         //long CHAC_Tiempo=20000;
@@ -105,7 +105,8 @@ public class main {
         			
         	        //poner ciudad < 122
 			        for(ciudad=1;ciudad<2;ciudad++){
-			        
+			        	
+			        	
 			        	System.out.println("ciudad: "+ ciudad);
 			        	
 			        	listaRestaurantes listaPrueba=new listaRestaurantes();
@@ -116,36 +117,38 @@ public class main {
 			            for(int i=0; i<iter;i++){//121 ciudades //76 2100 mas grande
 			            	
 			            	
-			            	/*
+			            	if(funcion==1){
+			                    System.out.println(compositeAlgorithm.RandomSearch(120, ciudad, listaPrueba).funcionFitness());
+			                	}
 			            	//System.out.println("Random: ");
 			            	long millis = System.currentTimeMillis();
 			            	//float genRan = compositeAlgorithm.geneticAlgorithm(ciudad, listaPrueba, 0.2f, 1, 0.6f).funcionFitness();
-			            	System.out.println("genetico random "+(System.currentTimeMillis()- millis));
+			            	//System.out.println("genetico random "+(System.currentTimeMillis()- millis));
 			        		millis = System.currentTimeMillis();
 			            	//System.out.println("Elitista: ");
-			        		float genEli = compositeAlgorithm.geneticAlgorithm(ciudad, listaPrueba, 0.2f, 2, 0.6f).funcionFitness();
-			            	System.out.println("genetico elitista "+(System.currentTimeMillis()- millis));
+			        		float genEli = compositeAlgorithm.geneticAlgorithm(ciudad, listaPrueba, 0.25f, 2, 0.8f).funcionFitness();
+			            	//System.out.println("genetico elitista "+(System.currentTimeMillis()- millis));
 			        		millis = System.currentTimeMillis();
 			            	//System.out.println("Ruleta: ");
 			            	//float genRul = compositeAlgorithm.geneticAlgorithm(ciudad, listaPrueba, 0.2f, 3, 0.6f).funcionFitness();
-			            	System.out.println("genetico ruleta "+(System.currentTimeMillis()- millis));
+			            	//System.out.println("genetico ruleta "+(System.currentTimeMillis()- millis));
 			        		millis = System.currentTimeMillis();
 			            	//System.out.println("Torneo: ");
 			            	//float genTor = compositeAlgorithm.geneticAlgorithm(ciudad, listaPrueba, 0.2f, 4, 0.6f).funcionFitness();
-			            	System.out.println("genetico torneo "+(System.currentTimeMillis()- millis));
+			            	//System.out.println("genetico torneo "+(System.currentTimeMillis()- millis));
 			        		millis = System.currentTimeMillis();
 			            	
 			            	float local =compositeAlgorithm.LocalSearch(ciudad, listaPrueba).funcionFitness();
 			  
-			            	System.out.println("local "+(System.currentTimeMillis()- millis));
+			            	//System.out.println("local "+(System.currentTimeMillis()- millis));
 			        		millis = System.currentTimeMillis();
-			            	float vns = compositeAlgorithm.VNS(ciudad, listaPrueba).funcionFitness();
-			            	System.out.println("VNS "+(System.currentTimeMillis()- millis));
+			            	//float vns = compositeAlgorithm.VNS(ciudad, listaPrueba).funcionFitness();
+			            	//System.out.println("VNS "+(System.currentTimeMillis()- millis));
 			            	//float random = compositeAlgorithm.RandomSearch(120, ciudad, listaPrueba).funcionFitness();
 			                time=System.currentTimeMillis();
 			                //actualTime=0;
 			                //System.out.println(ciudad);
-			                //System.out.println("Genetico: "+gen);
+			                System.out.println("Genetico: "+genEli );
 			               //System.out.println("Random: "+random);
 			               //System.out.println("local Search: "+local);
 			                
@@ -159,11 +162,11 @@ public class main {
 			                
 			                //rows.add(Arrays.asList(String.valueOf(genRan)+ "," + String.valueOf(genRul) + "," + String.valueOf(genTor) + "," + String.valueOf(genEli) + "," + String.valueOf(local) + "," + String.valueOf(vns))); 
 			                //archivo.append("\n");
-			                
+			                /*
 			                cadena = String.valueOf(local) + "," + String.valueOf(vns); 
 			                salida.println(cadena);
 			                salida.flush();
-			                
+			                */
 			                /**
 			                
 			                System.out.println(i+1);
@@ -207,15 +210,18 @@ public class main {
 			                }
 			                
 			                **/
-			            	if(funcion==1){
-			                    System.out.println(compositeAlgorithm.RandomSearch(120, ciudad, listaPrueba).funcionFitness());
-			                	}
+			            	
 			                if(funcion==2){
 			                
 			                    System.out.println(compositeAlgorithm.LocalSearch(ciudad, listaPrueba).funcionFitness());
 			                    //System.out.println("----------------");
 			                	//compositeAlgorithm.LocalSearch(ciudad, listaPrueba);
 			                    //System.out.println((System.currentTimeMillis()-time));
+			                }
+			                if(funcion==20){
+			                	System.out.println(compositeAlgorithm.VNS(ciudad, listaPrueba).funcionFitness());
+			                	//System.out.println((System.currentTimeMillis()-time));
+			 
 			                }
 			              /**  
 			                if(funcion==51){
@@ -430,6 +436,7 @@ public class main {
         System.out.println("VNS promedio: "+ promvns/30);
         System.out.println("VNS mejor: "+mejorvns);
         */
+        
         
     }
        

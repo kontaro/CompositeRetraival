@@ -130,8 +130,6 @@ public class Encode extends Solucion{
 			ArrayList<Integer> paquete = new ArrayList<Integer>();
 			ArrayList<Integer> cocina = new ArrayList<Integer>();
 			int iteracion = 0;
-			int j = 0;
-			float intra = 0;
 			gasto.add(i, 0);
 			while (gasto.get(i)<presupuesto) {
 				Restaurante nuevo=new Restaurante();
@@ -141,13 +139,11 @@ public class Encode extends Solucion{
 				if(aux > presupuesto || iteracion>=40){
 					break;
 				}else if(aux <= presupuesto && !contieneCocina(cocina, nuevo.getTipo())){
+					
 					gasto.set(i, aux);
-					
 					paquete.add(nuevo.getIdresturant());
-				
-					
 					cocina.addAll(nuevo.getTipo());
-					j++;
+
 				}
 				iteracion++;
 			
@@ -155,9 +151,64 @@ public class Encode extends Solucion{
 			gen.add(paquete);
 			tiposCocina.add(cocina);
 			similitud.add(intraPaquete(paquete));
+			
 		}
 		inter();
 		fitness();
+	}
+	
+	public boolean agregarRestaurante(Restaurante nuevo, int fila) {
+		int aux = gasto.get(fila);
+		aux = aux + nuevo.getCosto();
+		actualizarTiposCocina(fila);
+		if((aux > presupuesto)||contieneCocina(tiposCocina.get(fila), nuevo.getTipo())){
+			return false;
+		}else if(aux <= presupuesto ){
+			
+			gasto.set(fila, aux);
+			gen.get(fila).add(nuevo.getIdresturant());
+			tiposCocina.get(fila).addAll(nuevo.getTipo());
+			arreglarInter(fila);
+			similitud.add(intraPaquete(gen.get(fila)));
+			return true;
+		}
+		return false;
+		
+	}
+	
+	
+	public void agregarRestauranteFuerza(Restaurante nuevo, int fila) {
+		actualizarTiposCocina(fila);
+		while(!agregarRestaurante(nuevo, fila)) {
+			borrarRestauranteAzar(fila);
+		}
+	}
+	
+	public boolean borrarRestaurante(Restaurante aBorrar, int fila) {
+		int aux = getGasto().get(fila);
+		
+		if(!gen.get(fila).contains(aBorrar.getIdresturant())) {
+			return false;
+		}
+		
+		aux = aux - aBorrar.getCosto();
+		gasto.set(fila, aux);
+		aux = gen.get(fila).indexOf(aBorrar.getIdresturant());
+		gen.get(fila).remove(aux);
+		actualizarTiposCocina(fila);
+		arreglarInter(fila);
+		similitud.set(fila, intraPaquete(gen.get(fila)));
+		
+		return true;
+	}
+	
+	
+	public boolean borrarRestauranteAzar(int fila) {
+		int azar = gen.get(fila).size()-1, id;
+		azar = (int) (Math.random()*azar);
+		id = gen.get(fila).get(azar);
+		
+		return(borrarRestaurante(restaurantes.obtenerRestaurante(id), fila));
 	}
 	
 	public boolean contieneCocina(ArrayList<Integer> tiposExistentes, ArrayList<Integer> cocinaComparar) {
@@ -180,7 +231,7 @@ public class Encode extends Solucion{
 	 */
 	public float intraPaquete(ArrayList<Integer> paquete) {
 		
-		float compatibilidad=0, intra = 0;
+		float intra = 0;
 		
 		for(int i = 0 ; i < paquete.size(); i++) {
 			for(int j = i+1; j < paquete.size(); j++) {
@@ -201,15 +252,12 @@ public class Encode extends Solucion{
 		float maxCompatibilidad=0;
 		
 		//System.out.println("--------------------------------------------");
-		for (int i = 0; i < k; i++) {
+		for (int i = 0; i < k-1; i++) {
 			ArrayList<Float> diver = new ArrayList<Float>();	
-			for(int num = 0 ; num < i+1; i++) {
-				diver.add(num,(float) 0);
-			}
 			for (int j = i+1; j < k; j++) {
 				maxCompatibilidad=1-maximaCompatibilidad(i, j);
 				valorDiversidad=valorDiversidad+(maxCompatibilidad);
-				diver.add(j, maxCompatibilidad);
+				diver.add(maxCompatibilidad);
 			}
 			diversidad.add(i,diver);
 		}
@@ -228,8 +276,8 @@ public class Encode extends Solucion{
 	public float sumaInter() {
 		float inter = 0;
 		
-		for(int i = 0; i < k; i++) {
-			for(int j = i+1; j < k ; j++ ) {
+		for(int i = 0; i < k-1; i++) {
+			for(int j = 0; j < diversidad.get(i).size() ; j++ ) {
 				inter = inter + diversidad.get(i).get(j);
 			}
 		}
@@ -258,13 +306,16 @@ public class Encode extends Solucion{
 	}
 	
 	public void arreglarInter(int indicePaquete) {
-		
+		int j = indicePaquete, index = 0;
 		for(int i = indicePaquete+1; i < k; i++) {
-			diversidad.get(indicePaquete).set(i,(1- maximaCompatibilidad(indicePaquete,i)));
+			diversidad.get(indicePaquete).set(index,(1- maximaCompatibilidad(indicePaquete,i)));
+			index++;
 		}
 		
-		for(int j = 0; j < indicePaquete; j++) {
-			diversidad.get(j).set(indicePaquete,(1- maximaCompatibilidad(indicePaquete,j)));
+		
+		for(int i = 0; i < indicePaquete; i++) {
+			j--;
+			diversidad.get(i).set(j,(1- maximaCompatibilidad(indicePaquete,i)));
 		}
 		
 	}
@@ -283,12 +334,21 @@ public class Encode extends Solucion{
 		Encode hijo1 = new Encode(ciudad, presupuesto, k , alfa);
 		Encode hijo2 = new Encode(ciudad, presupuesto, k , alfa);
 		int posicion = (int)(Math.random()*(k-1));
+
 		
 		hijo1.setGen((ArrayList<ArrayList<Integer>>)padre1.getGen().clone());
 		hijo1.setRestaurantes(padre1.getRestaurantes());
+		hijo1.setGasto((ArrayList<Integer>)padre1.getGasto().clone());
+		hijo1.setTiposCocina((ArrayList<ArrayList<Integer>>)padre1.getTiposCocina().clone());
+		hijo1.setSimilitud((ArrayList<Float>)padre1.getSimilitud().clone());
+		hijo1.setDiversidad((ArrayList<ArrayList<Float>>)padre1.diversidad.clone());
 		
 		hijo2.setGen(getGen());
 		hijo2.setRestaurantes(restaurantes);
+		hijo2.setGasto((ArrayList<Integer>)gasto.clone());
+		hijo2.setTiposCocina((ArrayList<ArrayList<Integer>>)tiposCocina.clone());
+		hijo2.setSimilitud((ArrayList<Float>)similitud.clone());
+		hijo2.setDiversidad((ArrayList<ArrayList<Float>>)diversidad.clone());
 		
 		hijo1.getGen2().set(posicion, getGen().get(posicion));
 		hijo2.getGen2().set(posicion, padre1.getGen().get(posicion));
@@ -305,11 +365,119 @@ public class Encode extends Solucion{
 		hijo1.arreglarInter(posicion);
 		hijo2.arreglarInter(posicion);
 		
+		hijo1.fitness();
+		hijo2.fitness();
+		
 		hijos.add(hijo1);
 		hijos.add(hijo2);
 		
 		return hijos;
 		
+	}
+	
+	public void actualizarTiposCocina(int fila) {
+		ArrayList<Integer> cocinas = new ArrayList<Integer>();
+		for(int i= 0 ; i < gen.get(fila).size(); i++) {
+			Restaurante aux = restaurantes.obtenerRestaurante(gen.get(fila).get(i));
+			cocinas.addAll(aux.getTipo());
+		}
+		tiposCocina.set(fila, cocinas);
+	}
+	
+	public Encode mutacion1() {
+		int fila = k -1 , columna = restaurantes.getTamanoLista()-1, cambio = 0, aux, id;
+		
+		ArrayList<Integer> indices = new ArrayList<Integer>();
+		
+		Encode mutado = new Encode(ciudad, presupuesto, k , alfa);
+		mutado.setGen(getGen());
+		mutado.setRestaurantes(restaurantes);
+		mutado.setGasto((ArrayList<Integer>)gasto.clone());
+		mutado.setTiposCocina((ArrayList<ArrayList<Integer>>)tiposCocina.clone());
+		mutado.setSimilitud((ArrayList<Float>)similitud.clone());
+		mutado.setDiversidad((ArrayList<ArrayList<Float>>)diversidad.clone());
+		
+		
+		fila = (int) (Math.random()*fila);
+		
+		columna = (int) (Math.random()*columna);
+		id = restaurantes.getRestaurante(columna).getIdresturant();
+		
+		if(mutado.getGen2().get(fila).contains(id)) {
+			mutado.borrarRestaurante(restaurantes.getRestaurante(columna), fila);
+			
+			int iteracion = 0;
+			while (iteracion < 100){
+				Restaurante nuevo=new Restaurante();
+				nuevo = restaurantes.getRestauranteAzar(ciudad);
+				if(mutado.agregarRestaurante(nuevo, fila)==true) {
+					break;
+				}
+				iteracion++;
+			}
+			
+		}else {
+			mutado.agregarRestauranteFuerza(restaurantes.getRestaurante(columna), fila);
+		}
+		
+		fitness();
+		return mutado; 
+	
+	}
+	
+	public Encode mutacion2() {
+		int fila = k -1 , columna = restaurantes.getTamanoLista()-1, cambio = 0, aux, id;
+		
+		ArrayList<Integer> indices = new ArrayList<Integer>();
+		
+		Encode mutado = new Encode(ciudad, presupuesto, k , alfa);
+		mutado.setGen(getGen());
+		mutado.setRestaurantes(restaurantes);
+		mutado.setGasto((ArrayList<Integer>)gasto.clone());
+		mutado.setTiposCocina((ArrayList<ArrayList<Integer>>)tiposCocina.clone());
+		mutado.setSimilitud((ArrayList<Float>)similitud.clone());
+		mutado.setDiversidad((ArrayList<ArrayList<Float>>)diversidad.clone());
+		
+		
+		fila = (int) (Math.random()*fila);
+		
+		columna = (int) (Math.random()*columna);
+		id = restaurantes.getRestaurante(columna).getIdresturant();
+		
+		if(mutado.getGen2().get(fila).contains(id)) {
+			mutado.borrarRestaurante(restaurantes.getRestaurante(columna), fila);
+			
+			int iteracion = 0;
+			while (iteracion < 50){
+				Encode posible = new Encode(ciudad, presupuesto, k, alfa);
+				posible.setGen(mutado.getGen());
+				posible.setRestaurantes(restaurantes);
+				posible.setGasto((ArrayList<Integer>)mutado.getGasto().clone());
+				posible.setTiposCocina((ArrayList<ArrayList<Integer>>)mutado.getTiposCocina().clone());
+				posible.setSimilitud((ArrayList<Float>)mutado.getSimilitud().clone());
+				posible.setDiversidad((ArrayList<ArrayList<Float>>)mutado.getDiversidad().clone());
+				
+				Restaurante nuevo=new Restaurante();
+				nuevo = restaurantes.getRestauranteAzar(ciudad);
+				if(posible.agregarRestaurante(nuevo, fila)==true) {
+					if(posible.fitness()>= mutado.fitness()) {
+						mutado = posible;
+						break;
+					}else {
+						posible.borrarRestaurante(nuevo, fila);
+					}
+					
+				}
+				iteracion++;
+			}
+			
+		}else {
+			mutado.agregarRestauranteFuerza(restaurantes.getRestaurante(columna), fila);
+		}
+		
+		fitness();
+		return mutado; 
+	
 	}
 	
 	/*
@@ -652,6 +820,21 @@ public class Encode extends Solucion{
 	
 		return indice;
 		
+	}
+	
+	public ArrayList<Paquete> getPaquetes(){
+		ArrayList<Paquete> paquetes = new ArrayList<Paquete>();
+		
+		for(int i = 0; i < k; i++) {
+			Paquete paquete = new Paquete(presupuesto, ciudad);
+			for(int j = 0; j < gen.get(i).size(); j++) {
+				int id = gen.get(i).get(j);
+				paquete.agregarRestaurante(restaurantes.obtenerRestaurante(id));
+			}
+			paquetes.add(paquete);
+		}
+		
+		return paquetes;
 	}
 	
 	public ArrayList<ArrayList<Integer>> getGen() {

@@ -6,7 +6,7 @@ import java.util.Random;
 public class Paquete {
 	ArrayList<Restaurante> paquete =new ArrayList<Restaurante>();
 	ArrayList<Integer> tiposCocinas= new ArrayList<Integer>();
-	int fitnessPaquete= 0;
+	float fitnessPaquete= 0;
 	int ciudad=0;
 	int budget=0;
 	int presupuesto=0;
@@ -37,6 +37,8 @@ public class Paquete {
 			iteracion=iteracion+1;
 		
 		}
+		fitnessPaquete = compatibilidad();
+		
 	}
 	
 	public ArrayList<Integer> agregarSolucion(ArrayList<Restaurante> restaurantes){

@@ -347,41 +347,37 @@ public class SolucionGenetico {
 		return hijos;
 		
 	}
-	/*
-	public void mutacion(float porcentajeMutacion, PrintWriter file) {
+	
+	public void mutacion(float porcentajeMutacion) {
 		double muta;
-		String mutacion = "", antiguo ="";
-		listaRestaurantes restaurant = new listaRestaurantes(restaurantes);
+		
 		for(int i = 0; i < soluciones.size(); i++) {
 			muta = Math.random();
 			if(muta <= porcentajeMutacion) {
 				Encode mutado = new Encode(idCiudad, presupuesto, kPaquetes, alfa);
-				mutado = soluciones.get(i).mutacion1();
-				antiguo =antiguo+ String.valueOf(soluciones.get(i).fitness()) +",";
-				mutacion = mutacion + String.valueOf(mutado.fitness())+",";
+				mutado = soluciones.get(i).mutacion2();
 				
 				//if(mutado.fitness()>= soluciones.get(i).fitness()) {
 					soluciones.set(i, mutado);
 				//}
-				//System.out.println("muto ");
+				//soluciones.add(mutado);
 			}
 		}
-		file.println(antiguo);
-		file.println(mutacion);
-		file.flush();
+		
 	}
-	*/
+	
 	public void actualizarSoluciones(float porcentajePadres, int seleccion, float porcentajeMutacion, int iter) throws FileNotFoundException {
-		//soluciones.addAll(cruzamiento(porcentajePadres, seleccion));
-		System.out.println("seleccion: "+seleccion);
-		soluciones = cruzamiento(porcentajePadres, seleccion, iter);
+		soluciones.addAll(cruzamiento(porcentajePadres, seleccion,iter));
+		//System.out.println("seleccion: "+seleccion);
+		//soluciones = cruzamiento(porcentajePadres, seleccion, iter);
 		//System.out.println("antiguo: "+fitnessPromedio());
 		
-		PrintWriter file = new PrintWriter("mutacion"+iter+".csv");
+		//PrintWriter file = new PrintWriter("mutacion"+iter+".csv");
 		
 		soluciones = seleccionElitista(0.5f);
-		//mutacion(porcentajeMutacion,file);
-		file.close();
+		mutacion(porcentajeMutacion);
+		//soluciones = seleccionElitista(0.5f);
+		//file.close();
 		//System.out.println("nuevo: "+fitnessPromedio());
 		
 	}

@@ -1041,18 +1041,14 @@ public Solucion newVNS(int ciudad,listaRestaurantes lista,int iteraciones, int i
         	
         	mejor.updatePaquete(actual.mejorSolucion().getPaquetes2());
         	while(iteraciones > 0) {
-        		//System.out.println("Generacion: "+iteraciones);
         		actual.actualizarSoluciones(porcentajePadres, seleccion, porcentajeMutacion, iteraciones);
-        		//System.out.println("fitness: "+ actual.mejorSolucion().fitness());
-        		//System.out.println("fitness mejor:"+mejor.funcionFitness());
+        		
         		if((actual.mejorSolucion().fitness() - mejor.funcionFitness()) > 0){
-        			mejor.updatePaquete(actual.mejorSolucion().getPaquetes2());
-        			//System.out.println("mejora iter: "+ (100-iteraciones));
+        			mejor.updatePaquete(actual.mejorSolucion().getPaquetes());
+        			
         		}
         		iteraciones--;
         	}
-        	System.out.println("una vuelta"+ (System.currentTimeMillis()- millis));
-        	//System.out.println("ultimo "+mejor.soluciones.isEmpty());
         	return mejor;
         }
         
