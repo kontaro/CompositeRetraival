@@ -134,24 +134,18 @@ public class SolucionGenetico {
 	 */
 	
 	
-	public ArrayList<Encode> seleccionRuleta(float porcentajeASeleccionar,int iter) throws FileNotFoundException{
+	public ArrayList<Encode> seleccionRuleta(float porcentajeASeleccionar,int iter) {
 		ArrayList<Encode> padres = new ArrayList<Encode>();
 		int cantidad =(int) (soluciones.size()*porcentajeASeleccionar);
 		float suma = fitnessPromedio()*soluciones.size();
 		float[] individuos = new float[soluciones.size()];
 		
-		PrintWriter s = new PrintWriter("seleccionados"+iter+".csv");
-    	String cadena = "";
-		
 		individuos[0] = soluciones.get(0).fitness()/suma;;
 		
 		for(int i = 1; i < soluciones.size(); i++) {
-			cadena = cadena + String.valueOf(soluciones.get(i).fitness())+ ",";
 			individuos[i] = individuos[i-1]+(soluciones.get(i).fitness()/suma);
 		}
 		
-		s.println(cadena);
-		cadena="";
 		while(cantidad>0) {
 			float porcentaje = (float) Math.random();
 			
@@ -170,15 +164,10 @@ public class SolucionGenetico {
 					
 			if(!padres.contains(soluciones.get(k))){
 					padres.add(soluciones.get(k));
-					cadena = cadena + String.valueOf(soluciones.get(k).fitness())+ ",";
-					
 					
 					cantidad--;	
 			}
 		}
-		s.println(cadena);
-		s.flush();
-		s.close();
 		return padres;
 	}
 	
@@ -268,7 +257,7 @@ public class SolucionGenetico {
 		return padres;
 	}
 	
-	public ArrayList<Encode> cruzamiento(float porcentajePadres, int seleccion, int iter) throws FileNotFoundException {
+	public ArrayList<Encode> cruzamiento(float porcentajePadres, int seleccion, int iter)  {
 		ArrayList<Encode> padres = new ArrayList<Encode>();
 		ArrayList<Encode> hijos = new ArrayList<Encode>();
 		ArrayList<Pair> pares = new ArrayList<Pair>();
@@ -366,7 +355,7 @@ public class SolucionGenetico {
 		
 	}
 	
-	public void actualizarSoluciones(float porcentajePadres, int seleccion, float porcentajeMutacion, int iter) throws FileNotFoundException {
+	public void actualizarSoluciones(float porcentajePadres, int seleccion, float porcentajeMutacion, int iter) {
 		soluciones.addAll(cruzamiento(porcentajePadres, seleccion,iter));
 		//System.out.println("seleccion: "+seleccion);
 		//soluciones = cruzamiento(porcentajePadres, seleccion, iter);
@@ -380,6 +369,11 @@ public class SolucionGenetico {
 		//file.close();
 		//System.out.println("nuevo: "+fitnessPromedio());
 		
+	}
+	
+	public void actualizarSolucionesNSGA(float porcentajePadres, int seleccion, float porcentajeMutacion, int iter) {
+		soluciones.addAll(cruzamiento(porcentajePadres, seleccion,iter));
+		mutacion(porcentajeMutacion);
 	}
 	
 	public Encode mejorSolucion() {
@@ -409,6 +403,32 @@ public class SolucionGenetico {
 		for(int i = (lista.size()-1); i > 0; i--) {
 			for(int j = 0 ; j<i ; j++) {
 				if(lista.get(i).fitness()>lista.get(j).fitness()) {
+					Encode aux = lista.get(i);
+					lista.set(i, lista.get(j));
+					lista.set(j, aux);
+				}
+			}
+		}
+	}
+	
+	public void ordenarListaIntra(ArrayList<Encode> lista) {
+		
+		for(int i = (lista.size()-1); i > 0; i--) {
+			for(int j = 0 ; j<i ; j++) {
+				if(lista.get(i).sumaIntra()>lista.get(j).sumaIntra()) {
+					Encode aux = lista.get(i);
+					lista.set(i, lista.get(j));
+					lista.set(j, aux);
+				}
+			}
+		}
+	}
+	
+	public void ordenarListaInter(ArrayList<Encode> lista) {
+		
+		for(int i = (lista.size()-1); i > 0; i--) {
+			for(int j = 0 ; j<i ; j++) {
+				if(lista.get(i).sumaInter()>lista.get(j).sumaInter()) {
 					Encode aux = lista.get(i);
 					lista.set(i, lista.get(j));
 					lista.set(j, aux);

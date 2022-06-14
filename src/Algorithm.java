@@ -1052,6 +1052,8 @@ public Solucion newVNS(int ciudad,listaRestaurantes lista,int iteraciones, int i
         	return mejor;
         }
         
+        
+        
     // Nuevos Algoritmos para Composite Retrieval
         
 /**        

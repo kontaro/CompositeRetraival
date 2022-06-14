@@ -1,4 +1,8 @@
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class MultiObjetiveAlgorithm extends Algorithm{
 	float epsilon;
@@ -171,6 +175,7 @@ public class MultiObjetiveAlgorithm extends Algorithm{
         allNeighborhood.clear();
     }
     
+    //Entrega la frontera de pareto
     public void NDPFront(ArrayList<Solucion> Frontera) {
         //llamamos al sort
         boolean domino;
@@ -219,6 +224,314 @@ public class MultiObjetiveAlgorithm extends Algorithm{
         
     }
     
+    /**
+     * Funcion que indica si una solucion p domina a una solucion q, en caso de ser cierto devuelve true
+     * @param p
+     * @param q
+     * @return
+     */
+    public boolean dominar(Solucion p,Solucion q) {
+
+        if((p.intra()>(q.intra()) && p.inter()>=(q.inter())) || (p.intra()>=(q.intra()) && p.inter()>(q.inter()))) {
+            return true;
+        }
+
+        return false;
+
+    }
+    
+    /**
+     * Funcion que indica si una solucion p domina a una solucion q, en caso de ser cierto devuelve true
+     * @param p
+     * @param q
+     * @return
+     */
+    public boolean dominar(Encode p,Encode q) {
+
+        if((p.sumaIntra()>(q.sumaIntra()) && p.sumaInter()>=(q.sumaInter())) || (p.sumaIntra()>=(q.sumaIntra()) && p.sumaInter()>(q.sumaInter()))) {
+            return true;
+        }
+
+        return false;
+
+    }
+    
+    	
+    public void ordenamientoFuncionIntra(SolucionGenetico S) {
+    	
+    	S.ordenarListaIntra(S.getSoluciones());
+    }
+    
+    /**
+     * Funcion que devuelve las fronteras del nsga de un conjunto de puntos
+     * @param Frontera
+     */
+    public ArrayList<ArrayList<Solucion>> fastNonDominatedSorting(ArrayList<Solucion> poblation) {
+
+        ArrayList<ArrayList<Integer>> fronts=new ArrayList<ArrayList<Integer>>();
+        ArrayList<Integer> F1=new ArrayList<Integer>();
+        
+        ArrayList <ArrayList<Integer>> S=new ArrayList <ArrayList<Integer>>();
+        ArrayList <Integer> n=new ArrayList <Integer>();
+        
+
+        int indexp=0;
+        for(Solucion  p: poblation ) {
+        	ArrayList<Integer> Sp=new ArrayList <Integer>();
+        	int np=0;
+        	int indexq=0;
+            for(Solucion q : poblation ) {
+            	
+                if(dominar(p,q)) {
+                	Sp.add(indexq);
+                }else {
+                	np++;
+                }
+                indexq++;
+            }
+            n.add(indexp);
+            S.add(Sp);
+            if(np==0) {
+            	F1.add(indexp);
+            }
+            indexp++;
+        }
+        fronts.add(F1);
+        
+        ArrayList<Integer>Fi=F1;
+       
+        while(!Fi.isEmpty()) {
+        	ArrayList<Integer> F=new ArrayList<Integer>();
+        	
+        	Set<Integer> s=new HashSet<Integer>();
+        	for(Integer a:Fi) {
+        		s.addAll(S.get(a));
+        	}
+        	ArrayList<Integer> Sp=new ArrayList<>(s);
+        	
+        	for(Integer q:Sp) {
+        		int nq=n.get(q)-1;
+        		n.set(q,nq);
+        		if(nq==0){
+        			F.add(q);
+        		}
+        	}
+
+        	fronts.add(F);
+        	Fi=F;
+        }
+        ArrayList<ArrayList<Solucion>> Fronts=new ArrayList<ArrayList<Solucion>>();
+        
+        for(ArrayList<Integer> f: fronts ) {
+        	ArrayList <Solucion> front=new ArrayList <Solucion>();
+        	for(Integer  p: f ) {
+            	front.add(poblation.get(p));
+            }
+        	Fronts.add(front);
+        }
+        
+        return Fronts; 
+    }
+    
+    /**
+     * Funcion que devuelve las fronteras del nsga de un conjunto de puntos
+     * @param Frontera
+     */
+    public ArrayList<ArrayList<Encode>> fastNonDominatedSorting(SolucionGenetico poblation) {
+
+        ArrayList<ArrayList<Integer>> fronts=new ArrayList<ArrayList<Integer>>();
+        ArrayList<Integer> F1=new ArrayList<Integer>();
+        
+        ArrayList <ArrayList<Integer>> S=new ArrayList <ArrayList<Integer>>();
+        ArrayList <Integer> n=new ArrayList <Integer>();
+        
+
+        int indexp=0;
+        for(Encode  p: poblation.getSoluciones() ) {
+        	ArrayList<Integer> Sp=new ArrayList <Integer>();
+        	int np=0;
+        	int indexq=0;
+            for(Encode q : poblation.getSoluciones() ) {
+            	
+                if(dominar(p,q)) {
+                	Sp.add(indexq);
+                }else {
+                	np++;
+                }
+                indexq++;
+            }
+            n.add(indexp);
+            S.add(Sp);
+            if(np==0) {
+            	F1.add(indexp);
+            }
+            indexp++;
+        }
+        fronts.add(F1);
+        
+        ArrayList<Integer>Fi=F1;
+       
+        while(!Fi.isEmpty()) {
+        	ArrayList<Integer> F=new ArrayList<Integer>();
+        	
+        	Set<Integer> s=new HashSet<Integer>();
+        	for(Integer a:Fi) {
+        		s.addAll(S.get(a));
+        	}
+        	ArrayList<Integer> Sp=new ArrayList<>(s);
+        	
+        	for(Integer q:Sp) {
+        		int nq=n.get(q)-1;
+        		n.set(q,nq);
+        		if(nq==0){
+        			F.add(q);
+        		}
+        	}
+
+        	fronts.add(F);
+        	Fi=F;
+        }
+        ArrayList<ArrayList<Encode>> Fronts=new ArrayList<ArrayList<Encode>>();
+        
+        for(ArrayList<Integer> f: fronts ) {
+        	ArrayList <Encode> front=new ArrayList <Encode>();
+        	for(Integer  p: f ) {
+            	front.add(poblation.getSoluciones().get(p));
+            }
+        	Fronts.add(front);
+        }
+        
+        return Fronts; 
+    }
+    
+public void ordenarListaIntra(ArrayList<Encode> lista) {
+		
+		for(int i = (lista.size()-1); i > 0; i--) {
+			for(int j = 0 ; j<i ; j++) {
+				if(lista.get(i).sumaIntra()>lista.get(j).sumaIntra()) {
+					Encode aux = lista.get(i);
+					lista.set(i, lista.get(j));
+					lista.set(j, aux);
+				}
+			}
+		}
+	}
+	
+	public void ordenarListaInter(ArrayList<Encode> lista) {
+		
+		for(int i = (lista.size()-1); i > 0; i--) {
+			for(int j = 0 ; j<i ; j++) {
+				if(lista.get(i).sumaInter()>lista.get(j).sumaInter()) {
+					Encode aux = lista.get(i);
+					lista.set(i, lista.get(j));
+					lista.set(j, aux);
+				}
+			}
+		}
+	}
+    
+    public ArrayList<Float> crowdingDistance(ArrayList<Encode> front) {
+    	ArrayList<Float> distance = new ArrayList<Float>();
+    	distance.ensureCapacity(front.size());
+    	for(int i = 1 ; i <=2; i++) {
+    		ArrayList<Encode> auxFront = new ArrayList<Encode>();
+    		float crowDis = 0;
+    		ArrayList<Float> dist = new ArrayList<Float>();
+    		auxFront = (ArrayList<Encode>) front.clone();
+    		if(i == 1) {
+    			ordenarListaIntra(auxFront);
+    			for(int j = 0 ; j< auxFront.size(); j++) {
+    				int index = front.indexOf(auxFront.get(j));
+        			if(j==0 || j == auxFront.size()-1) {
+        				crowDis = Float.MAX_VALUE;
+        				distance.add(index,crowDis);
+        				crowDis = 0;
+        			}else {
+        				crowDis = auxFront.get(j+1).sumaIntra() - auxFront.get(j-1).sumaIntra();
+        				crowDis = crowDis/ (auxFront.get(auxFront.size()).sumaIntra() - auxFront.get(0).sumaIntra());
+        				crowDis = Math.abs(crowDis);
+        				distance.add(index,crowDis);
+        				crowDis = 0;
+        			}
+    			}
+    		}else {
+    			ordenarListaInter(auxFront);
+    			for(int j = 0 ; j< auxFront.size(); j++) {
+    				int index = front.indexOf(auxFront.get(j));
+        			if(j==0 || j == auxFront.size()-1) {
+        				crowDis = Float.MAX_VALUE;
+        				crowDis = distance.get(index) + crowDis;
+        				distance.set(index,crowDis);
+        				crowDis = 0;
+        			}else {
+        				crowDis = auxFront.get(j+1).sumaInter() - auxFront.get(j-1).sumaInter();
+        				crowDis = crowDis/ (auxFront.get(auxFront.size()).sumaInter() - auxFront.get(0).sumaInter());
+        				crowDis = Math.abs(crowDis);
+        				crowDis = distance.get(index) + crowDis;
+        				distance.set(index,crowDis);
+        				crowDis = 0;
+        			}
+    			}
+    		}
+    		
+    	}
+    	
+    	return distance;
+    }
+    
+    public void ordenarPorDistancia(ArrayList<Encode> front) {
+    	ArrayList<Float> distancia = crowdingDistance(front);
+    	
+    	for(int i = (distancia.size()-1); i > 0; i--) {
+			for(int j = 0 ; j<i ; j++) {
+				if(distancia.get(i)>distancia.get(j)) {
+					Encode aux = front.get(i);
+					float dist = distancia.get(i);
+					front.set(i, front.get(j));
+					distancia.set(i, distancia.get(j));
+					front.set(j, aux);
+					distancia.set(i, dist);
+				}
+			}
+		}
+    	
+    }
+    
+    public ArrayList<Encode> NSGAII(int ciudad, listaRestaurantes listaprueba, float porcentajePadres, int seleccion, float porcentajeMutacion){
+    	ArrayList<ArrayList<Encode>> fronteras = new ArrayList<ArrayList<Encode>>();
+    	int numPoblacion = 100;
+     	int iteraciones = 1;
+     	long millis = System.currentTimeMillis();
+ 		
+     	SolucionGenetico actual = new SolucionGenetico( listaprueba, ciudad, (float)0.5, presupuesto, kpaquetes, numPoblacion);
+     	
+     	while(iteraciones > 0) {
+     		ArrayList<Encode> soluciones = new ArrayList<Encode>();
+     		int i = 0;
+     		actual.actualizarSolucionesNSGA(porcentajePadres, seleccion, porcentajeMutacion, iteraciones);
+     		fronteras = fastNonDominatedSorting(actual);
+     		while(soluciones.size()+fronteras.get(i).size() <= 100) {
+     			soluciones.addAll(fronteras.get(i));
+     			i++;
+     		}
+     		
+     		if(soluciones.size()<100) {
+     			ordenarPorDistancia(fronteras.get(i));
+     			int j = 0;
+     			while(soluciones.size()<=100) {
+     				soluciones.add(fronteras.get(i).get(j));
+     				j++;
+     			}
+     		}
+     		actual.setSoluciones(soluciones);
+     		iteraciones--;
+     	}
+    	 
+     	
+    	 
+    	 return fronteras.get(0);
+    }
+    	
     
      public void generateNeighborhood(Solucion nodo,ArrayList<Solucion> allNeighborhood,listaRestaurantes lista) {
     	//System.out.println("----------------------------");

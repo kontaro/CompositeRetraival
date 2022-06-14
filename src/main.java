@@ -47,7 +47,7 @@ public class main {
         //de manera que se puedan correr varias pruebas a la vez
         float[] ganmas={(float) 0.5};
         int[] presupuestos= {50}; 
-        int[] funcions= {2}; 
+        int[] funcions= {69}; 
         int kpaquetes=10;//cantidad de paquetes
         int iter=30;
         int ciudad;
@@ -116,6 +116,16 @@ public class main {
 			            
 			            for(int i=0; i<iter;i++){//121 ciudades //76 2100 mas grande
 			            	
+			            	if(funcion == 69) {
+			            		ArrayList<Encode> sol = multiAlgorithm.NSGAII(ciudad, listaPrueba, 0.2f, 2, 0.8f);
+			            		String[][] table = new String[sol.size()][];
+			            		for(int j = 0; j < sol.size(); j++) {
+			            			table[i] = new String[] {Float.toString(sol.get(j).sumaIntra()), Float.toString(sol.get(j).sumaInter())};
+			            		}
+			            		for (String[] row : table) {
+			                        System.out.format("%15s %15s %15s %n", row);
+			                    }
+			            	}
 			            	
 			            	if(funcion==1){
 			                    System.out.println(compositeAlgorithm.RandomSearch(120, ciudad, listaPrueba).funcionFitness());
