@@ -8,6 +8,8 @@ public class Encode extends Solucion{
 	int presupuesto;
 	int k; //cantidad de paquetes
 	float alfa; 
+	float intra;
+	float inter;
     ArrayList<ArrayList<Integer>>  tiposCocina;
     float fitness;
     ArrayList<Integer> gasto;
@@ -266,21 +268,23 @@ public class Encode extends Solucion{
 	}
 	
 	public float sumaIntra() {
-		float intra = 0;
+		float Intra = 0;
 		for(int i = 0 ; i < similitud.size(); i++) {
-			intra = intra + similitud.get(i);
+			Intra = Intra + similitud.get(i);
 		}
-		return intra;
+		intra = Intra;
+		return Intra;
 	}
 	
 	public float sumaInter() {
-		float inter = 0;
+		float Inter = 0;
 		
 		for(int i = 0; i < k-1; i++) {
 			for(int j = 0; j < diversidad.get(i).size() ; j++ ) {
-				inter = inter + diversidad.get(i).get(j);
+				Inter = Inter + diversidad.get(i).get(j);
 			}
 		}
+		inter = Inter;
 		return inter;
 	}
 	

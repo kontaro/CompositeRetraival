@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 public class SolucionGenetico {
 	ArrayList<Encode> soluciones = new ArrayList<Encode>();
+	
 	ArrayList<Restaurante> restaurantes = new ArrayList<Restaurante>();
 	listaRestaurantes restaurants;
 	int idCiudad;
@@ -357,17 +358,12 @@ public class SolucionGenetico {
 	
 	public void actualizarSoluciones(float porcentajePadres, int seleccion, float porcentajeMutacion, int iter) {
 		soluciones.addAll(cruzamiento(porcentajePadres, seleccion,iter));
-		//System.out.println("seleccion: "+seleccion);
+
 		//soluciones = cruzamiento(porcentajePadres, seleccion, iter);
-		//System.out.println("antiguo: "+fitnessPromedio());
-		
-		//PrintWriter file = new PrintWriter("mutacion"+iter+".csv");
-		
+	
 		soluciones = seleccionElitista(0.5f);
 		mutacion(porcentajeMutacion);
-		//soluciones = seleccionElitista(0.5f);
-		//file.close();
-		//System.out.println("nuevo: "+fitnessPromedio());
+		
 		
 	}
 	

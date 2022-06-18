@@ -104,7 +104,9 @@ public class main {
         	        ArrayList<Double> lista= new ArrayList<Double>();
         			
         	        //poner ciudad < 122
-			        for(ciudad=1;ciudad<2;ciudad++){
+        	        
+        	        long actualTime=System.currentTimeMillis();
+			        for(ciudad=1;ciudad<122;ciudad++){
 			        	
 			        	
 			        	System.out.println("ciudad: "+ ciudad);
@@ -120,10 +122,10 @@ public class main {
 			            		ArrayList<Encode> sol = multiAlgorithm.NSGAII(ciudad, listaPrueba, 0.2f, 2, 0.8f);
 			            		String[][] table = new String[sol.size()][];
 			            		for(int j = 0; j < sol.size(); j++) {
-			            			table[i] = new String[] {Float.toString(sol.get(j).sumaIntra()), Float.toString(sol.get(j).sumaInter())};
+			            			table[j] = new String[] {Float.toString(sol.get(j).sumaIntra()), Float.toString(sol.get(j).sumaInter())};
 			            		}
 			            		for (String[] row : table) {
-			                        System.out.format("%15s %15s %15s %n", row);
+			                        System.out.format("%15s %15s %n", row);
 			                    }
 			            	}
 			            	
@@ -136,7 +138,7 @@ public class main {
 			            	//System.out.println("genetico random "+(System.currentTimeMillis()- millis));
 			        		millis = System.currentTimeMillis();
 			            	//System.out.println("Elitista: ");
-			        		float genEli = compositeAlgorithm.geneticAlgorithm(ciudad, listaPrueba, 0.25f, 2, 0.8f).funcionFitness();
+			        		//float genEli = compositeAlgorithm.geneticAlgorithm(ciudad, listaPrueba, 0.25f, 2, 0.8f).funcionFitness();
 			            	//System.out.println("genetico elitista "+(System.currentTimeMillis()- millis));
 			        		millis = System.currentTimeMillis();
 			            	//System.out.println("Ruleta: ");
@@ -158,7 +160,7 @@ public class main {
 			                time=System.currentTimeMillis();
 			                //actualTime=0;
 			                //System.out.println(ciudad);
-			                System.out.println("Genetico: "+genEli );
+			              //  System.out.println("Genetico: "+genEli );
 			               //System.out.println("Random: "+random);
 			               //System.out.println("local Search: "+local);
 			                
@@ -413,7 +415,8 @@ public class main {
 			            }
 			            
 			        }
-        
+			        actualTime = System.currentTimeMillis()-actualTime;
+			        System.out.println(actualTime);
         		}
         	}
         }
@@ -449,6 +452,6 @@ public class main {
         
         
     }
-       
+    
         //imprimirSolucion(lista);
 }

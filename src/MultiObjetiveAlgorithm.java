@@ -248,11 +248,7 @@ public class MultiObjetiveAlgorithm extends Algorithm{
      */
     public boolean dominar(Encode p,Encode q) {
 
-        if((p.sumaIntra()>(q.sumaIntra()) && p.sumaInter()>=(q.sumaInter())) || (p.sumaIntra()>=(q.sumaIntra()) && p.sumaInter()>(q.sumaInter()))) {
-            return true;
-        }
-
-        return false;
+        return((p.sumaIntra()>(q.sumaIntra()) && p.sumaInter()>=(q.sumaInter())) || (p.sumaIntra()>=(q.sumaIntra()) && p.sumaInter()>(q.sumaInter()))) ;
 
     }
     
@@ -404,7 +400,45 @@ public class MultiObjetiveAlgorithm extends Algorithm{
         return Fronts; 
     }
     
-public void ordenarListaIntra(ArrayList<Encode> lista) {
+    public ArrayList<ArrayList<Encode>> clasificacionFronteras(SolucionGenetico poblation){
+    	
+    	ArrayList<Encode> P = poblation.getSoluciones();
+    	ArrayList<ArrayList<Encode>> fronts = new ArrayList<ArrayList<Encode>>();
+    	ArrayList<ArrayList<Integer>> dominado=new ArrayList<ArrayList<Integer>>();
+    		
+    	for(Encode p:P) {
+    		ArrayList<Integer> dom = new ArrayList<Integer>();
+    		for(Encode q:P) {
+    			if(!p.equals(q)) {
+    				if(dominar(q,p)) {
+    					dom.add(1);
+    				}
+    			}
+    		}
+    		dominado.add(dom);
+    	}    
+    	
+    	int aux=0, individuos = 0;
+    	while(individuos < P.size()) {
+    		ArrayList<Encode> front = new ArrayList<Encode>(); 
+    		for(int i = 0; i < dominado.size(); i++) {
+    			ArrayList<Integer> dom = dominado.get(i);
+    			if(aux == dom.size()) {
+    				front.add(P.get(i));
+    				individuos++;
+    			}
+    		}
+    		aux++;
+    		if(front.size()>0) {
+    			fronts.add(front);
+    		}
+ 
+    	}
+        
+        return fronts; 
+    }
+    
+    public void ordenarListaIntra(ArrayList<Encode> lista) {
 		
 		for(int i = (lista.size()-1); i > 0; i--) {
 			for(int j = 0 ; j<i ; j++) {
@@ -432,25 +466,26 @@ public void ordenarListaIntra(ArrayList<Encode> lista) {
     
     public ArrayList<Float> crowdingDistance(ArrayList<Encode> front) {
     	ArrayList<Float> distance = new ArrayList<Float>();
-    	distance.ensureCapacity(front.size());
+    	for(int i = 0; i<front.size(); i++) {
+    		distance.add(0f);
+    	}
     	for(int i = 1 ; i <=2; i++) {
     		ArrayList<Encode> auxFront = new ArrayList<Encode>();
     		float crowDis = 0;
-    		ArrayList<Float> dist = new ArrayList<Float>();
     		auxFront = (ArrayList<Encode>) front.clone();
     		if(i == 1) {
     			ordenarListaIntra(auxFront);
     			for(int j = 0 ; j< auxFront.size(); j++) {
     				int index = front.indexOf(auxFront.get(j));
         			if(j==0 || j == auxFront.size()-1) {
-        				crowDis = Float.MAX_VALUE;
-        				distance.add(index,crowDis);
+        				crowDis = 4294967;
+        				distance.set(index,crowDis);
         				crowDis = 0;
         			}else {
         				crowDis = auxFront.get(j+1).sumaIntra() - auxFront.get(j-1).sumaIntra();
-        				crowDis = crowDis/ (auxFront.get(auxFront.size()).sumaIntra() - auxFront.get(0).sumaIntra());
+        				crowDis = crowDis/ (auxFront.get(auxFront.size()-1).sumaIntra() - auxFront.get(0).sumaIntra());
         				crowDis = Math.abs(crowDis);
-        				distance.add(index,crowDis);
+        				distance.set(index,crowDis);
         				crowDis = 0;
         			}
     			}
@@ -459,13 +494,13 @@ public void ordenarListaIntra(ArrayList<Encode> lista) {
     			for(int j = 0 ; j< auxFront.size(); j++) {
     				int index = front.indexOf(auxFront.get(j));
         			if(j==0 || j == auxFront.size()-1) {
-        				crowDis = Float.MAX_VALUE;
+        				crowDis = 4294967;
         				crowDis = distance.get(index) + crowDis;
         				distance.set(index,crowDis);
         				crowDis = 0;
         			}else {
         				crowDis = auxFront.get(j+1).sumaInter() - auxFront.get(j-1).sumaInter();
-        				crowDis = crowDis/ (auxFront.get(auxFront.size()).sumaInter() - auxFront.get(0).sumaInter());
+        				crowDis = crowDis/ (auxFront.get(auxFront.size()-1).sumaInter() - auxFront.get(0).sumaInter());
         				crowDis = Math.abs(crowDis);
         				crowDis = distance.get(index) + crowDis;
         				distance.set(index,crowDis);
@@ -500,8 +535,7 @@ public void ordenarListaIntra(ArrayList<Encode> lista) {
     public ArrayList<Encode> NSGAII(int ciudad, listaRestaurantes listaprueba, float porcentajePadres, int seleccion, float porcentajeMutacion){
     	ArrayList<ArrayList<Encode>> fronteras = new ArrayList<ArrayList<Encode>>();
     	int numPoblacion = 100;
-     	int iteraciones = 1;
-     	long millis = System.currentTimeMillis();
+     	int iteraciones = 100;
  		
      	SolucionGenetico actual = new SolucionGenetico( listaprueba, ciudad, (float)0.5, presupuesto, kpaquetes, numPoblacion);
      	
@@ -509,26 +543,31 @@ public void ordenarListaIntra(ArrayList<Encode> lista) {
      		ArrayList<Encode> soluciones = new ArrayList<Encode>();
      		int i = 0;
      		actual.actualizarSolucionesNSGA(porcentajePadres, seleccion, porcentajeMutacion, iteraciones);
-     		fronteras = fastNonDominatedSorting(actual);
-     		while(soluciones.size()+fronteras.get(i).size() <= 100) {
+     		
+     		fronteras = clasificacionFronteras(actual);
+     		while(soluciones.size()+fronteras.get(i).size() <= numPoblacion ) {
      			soluciones.addAll(fronteras.get(i));
      			i++;
      		}
-     		
-     		if(soluciones.size()<100) {
+     		/*
+     		i = 0;
+     		fronteras.add(actual.getSoluciones());
+     		*/
+     		if(soluciones.size()< numPoblacion ) {
      			ordenarPorDistancia(fronteras.get(i));
      			int j = 0;
-     			while(soluciones.size()<=100) {
+     			while(soluciones.size()< numPoblacion ) {
      				soluciones.add(fronteras.get(i).get(j));
      				j++;
      			}
      		}
+     		
      		actual.setSoluciones(soluciones);
      		iteraciones--;
      	}
     	 
      	
-    	 
+    	 //return actual.getSoluciones();
     	 return fronteras.get(0);
     }
     	
