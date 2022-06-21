@@ -171,7 +171,7 @@ public class Encode extends Solucion{
 			gen.get(fila).add(nuevo.getIdresturant());
 			tiposCocina.get(fila).addAll(nuevo.getTipo());
 			arreglarInter(fila);
-			similitud.add(intraPaquete(gen.get(fila)));
+			similitud.set(fila, intraPaquete(gen.get(fila)));
 			return true;
 		}
 		return false;
@@ -233,15 +233,15 @@ public class Encode extends Solucion{
 	 */
 	public float intraPaquete(ArrayList<Integer> paquete) {
 		
-		float intra = 0;
+		float Intra = 0;
 		
 		for(int i = 0 ; i < paquete.size(); i++) {
 			for(int j = i+1; j < paquete.size(); j++) {
-				intra = intra + restaurantes.obtenerRestaurante(paquete.get(i)).searchCompatInstersection(paquete.get(j));
+				Intra = Intra + restaurantes.obtenerRestaurante(paquete.get(i)).searchCompatInstersection(paquete.get(j));
 			}
 		}
 		
-		return intra;
+		return Intra;
 		
 		
 	}
