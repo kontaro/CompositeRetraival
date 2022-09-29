@@ -1032,13 +1032,13 @@ public Solucion newVNS(int ciudad,listaRestaurantes lista,int iteraciones, int i
         
     // Algoritmo genetico de la Nicolle c:
         public Solucion geneticAlgorithm(int ciudad, listaRestaurantes listaprueba, float porcentajePadres, int seleccion, float porcentajeMutacion) throws FileNotFoundException {
-        	int numPoblacion = 100;
-        	int iteraciones = 100;
+        	int numPoblacion = 400;
+        	int iteraciones = 800;
         	long millis = System.currentTimeMillis();
     		
         	SolucionGenetico actual = new SolucionGenetico( listaprueba, ciudad, alfa, presupuesto, kpaquetes, numPoblacion);
         	Solucion mejor = new Solucion(ciudad, alfa, presupuesto);
-        	
+        	porcentajeMutacion = 1;
         	mejor.updatePaquete(actual.mejorSolucion().getPaquetes2());
         	while(iteraciones > 0) {
         		actual.actualizarSoluciones(porcentajePadres, seleccion, porcentajeMutacion, iteraciones);

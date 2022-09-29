@@ -1,14 +1,8 @@
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-import java.io.PrintWriter;
 import java.io.IOException;
+
+
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -41,15 +35,15 @@ public class main {
          */ 
         int funcion=0;
         float ganma=(float)0;
-        int presupuesto=0;
+        int presupuesto=100;
         int vecindad=200; // cantidad de vecinos a generar
         
         //de manera que se puedan correr varias pruebas a la vez
         float[] ganmas={(float) 0.5};
-        int[] presupuestos= {50}; 
+        int[] presupuestos= {100}; 
         int[] funcions= {69}; 
         int kpaquetes=10;//cantidad de paquetes
-        int iter=30;
+        int iter=10;
         int ciudad;
         long CHAC_Tiempo=20000;
         //long CHAC_Tiempo=20000;
@@ -106,9 +100,9 @@ public class main {
         	        //poner ciudad < 122
         	        
         	        long actualTime=System.currentTimeMillis();
-			        for(ciudad=1;ciudad<122;ciudad++){
-			        	
-			        	
+			        for(ciudad=76;ciudad<77;ciudad++){
+			        	Excel solucion = new Excel();
+			        	Excel resultados = new Excel();
 			        	System.out.println("ciudad: "+ ciudad);
 			        	
 			        	listaRestaurantes listaPrueba=new listaRestaurantes();
@@ -119,18 +113,94 @@ public class main {
 			            for(int i=0; i<iter;i++){//121 ciudades //76 2100 mas grande
 			            	
 			            	if(funcion == 69) {
+			            		String h = "Pareto " + Integer.toString(i+1);
+			            		String excel = "NSGAII Random 50 "; 
+			            		solucion.crearHoja(h);
 			            		ArrayList<Encode> sol = multiAlgorithm.NSGAII(ciudad, listaPrueba, 0.2f, 2, 0.8f);
-			            		String[][] table = new String[sol.size()][];
+			            		String[][] table = new String[sol.size()+1][];
+			            		table[0] = new String[] {"intra", "inter"};
+			            		solucion.escribirFila(table[0]);
 			            		for(int j = 0; j < sol.size(); j++) {
-			            			table[j] = new String[] {Float.toString(sol.get(j).sumaIntra()), Float.toString(sol.get(j).sumaInter())};
+			            			if(sol.get(j).intra>95) {
+			            				for(int x =0; x < sol.get(j).getGen2().size();x++) {
+			            					sol.get(j).similitud.set(x, sol.get(j).intraPaquete(sol.get(j).getGen2().get(x)));
+			            				}
+			            			}
+			            			table[j+1] = new String[] {Float.toString(sol.get(j).sumaIntra()), Float.toString(sol.get(j).sumaInter())};
+			            			solucion.escribirFila(table[j+1]);
+			           
+			            		}
+			            		solucion.GuardarExcel(excel);
+			            		for (String[] row : table) {
+			                        System.out.format("%15s %15s %n", row);
+			                    }
+			            		
+			            	}
+			            	if(funcion == 70) {
+			            		
+			            		String hoja = "Pareto " + Integer.toString(i+1); 
+			            		resultados.crearHoja(hoja);
+			            		ArrayList<Encode> sol = multiAlgorithm.MOGA(ciudad, listaPrueba, 0.2f, 2, 0.8f);
+			            		String[][] table = new String[sol.size()+1][];
+			            		
+			            		table[0] = new String[] {"intra", "inter"};
+			            		resultados.escribirFila(table[0]);
+			            		for(int j = 0; j < sol.size(); j++) {
+			            			if(sol.get(j).intra>95) {
+			            				for(int x =0; x < sol.get(j).getGen2().size();x++) {
+			            					sol.get(j).similitud.set(x, sol.get(j).intraPaquete(sol.get(j).getGen2().get(x)));
+			            				}
+			            			}
+			            			table[j+1] = new String[] {Float.toString(sol.get(j).sumaIntra()), Float.toString(sol.get(j).sumaInter())};
+			            			resultados.escribirFila(table[j+1]);
+			            			
 			            		}
 			            		for (String[] row : table) {
 			                        System.out.format("%15s %15s %n", row);
 			                    }
+			            		
 			            	}
+			            	if(funcion==30){
+			            		String[][] table = new String[10][];
+			            		int x = 1;
+			            		table[0] = new String[] {"intra", "inter"};
+			                	for(float j=(float)0.1;j<1;j=j+(float)0.1) {
+			                		Solucion gen = compositeAlgorithm.geneticAlgorithm(ciudad, listaPrueba,0.25f, 2, 0.8f);
+			                		compositeAlgorithm.alfa=j;
+			                		table[x] = new String[] {Float.toString(gen.intra()), Float.toString(gen.inter())};
+			                		x++;
+			                				
+			                	}
+			                	for (String[] row : table) {
+			                        System.out.format("%15s %15s %n", row);
+			                    }
+			                	
+			                }
+			            	
+			            	if(funcion==31){
+			            		String[][] table = new String[10][];
+			            		int x = 1;
+			            		table[0] = new String[] {"intra", "inter"};
+			                	for(float j=(float)0.1;j<1;j=j+(float)0.1) {
+			                		Solucion local = compositeAlgorithm.LocalSearch(ciudad, listaPrueba);
+			                		compositeAlgorithm.alfa=j;
+			      
+			                		table[x] = new String[] {Float.toString(local.intra()), Float.toString(local.inter())};
+			                		x++;
+			                				
+			                	}
+			                	for (String[] row : table) {
+			                        System.out.format("%15s %15s %n", row);
+			                    }
+			                	
+			                }
 			            	
 			            	if(funcion==1){
 			                    System.out.println(compositeAlgorithm.RandomSearch(120, ciudad, listaPrueba).funcionFitness());
+			                	}
+			            	
+			            	if(funcion==3){
+			                    System.out.println(compositeAlgorithm.geneticAlgorithm(ciudad, listaPrueba,0.25f, 2, 0.8f).funcionFitness());
 			                	}
 			            	//System.out.println("Random: ");
 			            	long millis = System.currentTimeMillis();
@@ -397,14 +467,7 @@ public class main {
 			                	//System.out.println((System.currentTimeMillis()-time));
 			                }
 			                
-			                if(funcion==30){
-			                	for(float j=(float)0.1;j<1;j=j+(float)0.1) {
-			                		compositeAlgorithm.alfa=j;
-			                		System.out.println(compositeAlgorithm.LocalSearch(ciudad, listaPrueba).datosFitness());
-			                	}
-			
 			                
-			                }
 			                if(funcion==31) {
 			                	multiAlgorithm.epsilon = (float)0.0;
 			                	multiAlgorithm.ParetoLocalSearch(ciudad, listaPrueba);
@@ -414,9 +477,11 @@ public class main {
 			            	**/
 			            }
 			            
+			            resultados.GuardarExcel("Moga Elite 100");
+			            
 			        }
 			        actualTime = System.currentTimeMillis()-actualTime;
-			        System.out.println(actualTime);
+			       // System.out.println(actualTime);
         		}
         	}
         }
@@ -455,3 +520,4 @@ public class main {
     
         //imprimirSolucion(lista);
 }
+

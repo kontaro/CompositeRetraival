@@ -400,6 +400,44 @@ public class MultiObjetiveAlgorithm extends Algorithm{
         return Fronts; 
     }
     
+    public ArrayList<Encode> pareto(SolucionGenetico poblation){
+    	
+    	ArrayList<Encode> P = poblation.getSoluciones();
+    	ArrayList<ArrayList<Encode>> fronts = new ArrayList<ArrayList<Encode>>();
+    	ArrayList<ArrayList<Integer>> dominado=new ArrayList<ArrayList<Integer>>();
+    		
+    	for(Encode p:P) {
+    		ArrayList<Integer> dom = new ArrayList<Integer>();
+    		for(Encode q:P) {
+    			if(!p.equals(q)) {
+    				if(dominar(q,p)) {
+    					dom.add(1);
+    				}
+    			}
+    		}
+    		dominado.add(dom);
+    	}    
+    	ArrayList<Encode> front = new ArrayList<Encode>(); 
+   		for(int i = 0; i < dominado.size(); i++) {
+   			ArrayList<Integer> dom = dominado.get(i);
+   			if(0 == dom.size()) {
+   				boolean existe = false;
+   				for(int j = 0; j < front.size();j++) {
+   					if(P.get(i).inter == P.get(j).inter && P.get(i).intra == P.get(j).intra) {
+   						existe = true;
+   						break;
+   					}
+   				}
+   				if(!existe) {
+   					front.add(P.get(i));
+   				}
+    			
+    		}
+    	}
+    	 
+        return front; 
+    }
+    
     public ArrayList<ArrayList<Encode>> clasificacionFronteras(SolucionGenetico poblation){
     	
     	ArrayList<Encode> P = poblation.getSoluciones();
@@ -436,6 +474,84 @@ public class MultiObjetiveAlgorithm extends Algorithm{
     	}
         
         return fronts; 
+    }
+    
+    public ArrayList<Encode> SeleccionElitistaMO(SolucionGenetico P, float porcentaje){
+    	ArrayList<Encode> padres = new ArrayList<Encode>();
+		int cantidad;
+		float div = porcentaje;
+		boolean flag = false;
+		cantidad = (int) (P.getSoluciones().size()*(div));
+		
+		for(ArrayList<Encode> Front: clasificacionFronteras(P)) {
+			for(Encode s: Front) {
+				padres.add(s);
+				if(padres.size()==cantidad) {
+					flag = true;
+					break;
+				}
+			}
+			if(flag) {
+				break;
+			}
+		}
+		
+		
+		
+		return padres;
+    }
+    public ArrayList<Encode> SeleccionRandomMO(SolucionGenetico P, float porcentaje){
+    	ArrayList<Encode> padres = new ArrayList<Encode>();
+		int cantidad;
+		float div = porcentaje;
+		cantidad = (int) (P.getSoluciones().size()*(div));
+		
+		while(cantidad>0) {
+			int aleatorio = (int)(Math.random()* (P.getSoluciones().size()-1));
+			if(!padres.contains(P.getSoluciones().get(aleatorio))) {
+				padres.add(P.getSoluciones().get(aleatorio));
+				cantidad--;
+			}
+		}
+
+		return padres;
+    }
+    public ArrayList<Encode> SeleccionTorneoMO(SolucionGenetico P, float porcentaje){
+    	ArrayList<Encode> padres = new ArrayList<Encode>();
+    	ArrayList<Encode> candidatos = new ArrayList<Encode>();
+		int cantidad;
+		float div = porcentaje;
+		cantidad = (int) (P.getSoluciones().size()*(div));
+		int indice1, indice2;
+		
+		for(ArrayList<Encode> Front: clasificacionFronteras(P)) {
+			for(Encode s: Front) {
+				candidatos.add(s);	
+			}
+		}
+		
+		while(cantidad>0) {	
+			
+			indice1 = (int)(Math.random()* (P.getSoluciones().size()-1));
+			indice2 = (int)(Math.random()* (P.getSoluciones().size()-1));
+			
+			
+			if(candidatos.indexOf(P.getSoluciones().get(indice1))<=candidatos.indexOf(P.getSoluciones().get(indice2))){
+				if(!padres.contains(P.getSoluciones().get(indice1))) {
+					padres.add(P.getSoluciones().get(indice1));
+					cantidad--;
+				}
+			}else {
+				if(!padres.contains(P.getSoluciones().get(indice2))) {
+					padres.add(P.getSoluciones().get(indice2));
+					cantidad--;
+				}
+			}
+				
+		}
+		
+		
+		return padres;
     }
     
     public void ordenarListaIntra(ArrayList<Encode> lista) {
@@ -514,6 +630,7 @@ public class MultiObjetiveAlgorithm extends Algorithm{
     	return distance;
     }
     
+    
     public void ordenarPorDistancia(ArrayList<Encode> front) {
     	ArrayList<Float> distancia = crowdingDistance(front);
     	
@@ -532,9 +649,47 @@ public class MultiObjetiveAlgorithm extends Algorithm{
     	
     }
     
+    public ArrayList<Encode> nAleatorios(ArrayList<Encode> soluciones, int n){
+    	ArrayList<Encode> aleatorios = new ArrayList<Encode>();
+    	
+    	for(int i = 0; i < n; i++) {
+    		int index = (int) (Math.random()*soluciones.size()-1);
+    		aleatorios.add(soluciones.get(index));
+    	}
+    	
+    	return aleatorios;
+    }
+    
+    public ArrayList<Encode> MOGA(int ciudad, listaRestaurantes listaprueba, float porcentajePadres, int seleccion, float porcentajeMutacion){  	
+    	int numPoblacion = 1000;
+     	int iteraciones = 100;
+     	SolucionGenetico actual = new SolucionGenetico( listaprueba, ciudad, (float)0.5, presupuesto, kpaquetes, numPoblacion);
+     	ArrayList<Encode> noDominadas = pareto(actual);
+     	
+     	while(iteraciones > 0) {
+     		actual.actualizarSolucionesMOGA(porcentajePadres, seleccion, porcentajeMutacion, iteraciones);
+     		
+     		if(noDominadas.size()>0) {
+     			if(noDominadas.size()<=10) {
+     				actual.borrarNPeoresSoluciones(noDominadas.size());
+     				actual.getSoluciones().addAll(noDominadas);
+     			}else {
+     				actual.borrarNPeoresSoluciones(10);
+     				actual.getSoluciones().addAll(nAleatorios(noDominadas, 10));
+     			}
+     			
+     		}
+     		
+     		noDominadas = pareto(actual);
+     		iteraciones--;
+     	}
+    	 
+    	 return noDominadas;
+    }
+    
     public ArrayList<Encode> NSGAII(int ciudad, listaRestaurantes listaprueba, float porcentajePadres, int seleccion, float porcentajeMutacion){
     	ArrayList<ArrayList<Encode>> fronteras = new ArrayList<ArrayList<Encode>>();
-    	int numPoblacion = 100;
+    	int numPoblacion = 700;
      	int iteraciones = 100;
  		
      	SolucionGenetico actual = new SolucionGenetico( listaprueba, ciudad, (float)0.5, presupuesto, kpaquetes, numPoblacion);
@@ -542,7 +697,9 @@ public class MultiObjetiveAlgorithm extends Algorithm{
      	while(iteraciones > 0) {
      		ArrayList<Encode> soluciones = new ArrayList<Encode>();
      		int i = 0;
-     		actual.actualizarSolucionesNSGA(porcentajePadres, seleccion, porcentajeMutacion, iteraciones);
+     		//actual.actualizarSolucionesNSGA2(SeleccionElitistaMO(actual, porcentajePadres), porcentajeMutacion);
+     		//actual.actualizarSolucionesNSGA2(SeleccionTorneoMO(actual, porcentajePadres), porcentajeMutacion);
+     		actual.actualizarSolucionesNSGA2(SeleccionRandomMO(actual, porcentajePadres), porcentajeMutacion);
      		
      		fronteras = clasificacionFronteras(actual);
      		while(soluciones.size()+fronteras.get(i).size() <= numPoblacion ) {
@@ -566,11 +723,19 @@ public class MultiObjetiveAlgorithm extends Algorithm{
      		iteraciones--;
      	}
     	 
-     	
+     	ArrayList<Encode> sol = new ArrayList<Encode>();
+     	int cont = 0;
+     	for(ArrayList<Encode> front: fronteras) {
+     		sol.addAll(front);
+     		cont++;
+     		if(cont == 3) {
+     			break;
+     		}
+     	}
+     	//return sol;
     	 //return actual.getSoluciones();
     	 return fronteras.get(0);
     }
-    	
     
      public void generateNeighborhood(Solucion nodo,ArrayList<Solucion> allNeighborhood,listaRestaurantes lista) {
     	//System.out.println("----------------------------");

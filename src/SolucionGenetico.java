@@ -99,6 +99,34 @@ public class SolucionGenetico {
 		ordenarLista(aux);
 		
 		for(int i = (0); i < cantidad ; i++) {
+			if(aux.get(i).getSimilitud().size()>10) {
+				System.out.println("Ayura seleccion");
+			}
+			padres.add(i,aux.get(i));
+		}
+		
+		return padres;
+	}
+	
+	
+	
+	public ArrayList<Encode> seleccionMoga(float porcentaje) {
+		ArrayList<Encode> padres = new ArrayList<Encode>();
+		ArrayList<Encode> aux = new ArrayList<Encode>();
+		int cantidad;
+		float div = porcentaje;
+		alfa = (float) Math.random();
+		
+		aux = (ArrayList<Encode>) soluciones.clone();
+		
+		for(int i = 0; i< aux.size(); i++) {
+			aux.get(i).setAlfa(alfa);
+		}
+		
+		cantidad = (int) (soluciones.size()*(div));
+		ordenarLista(aux);
+		
+		for(int i = (0); i < cantidad ; i++) {
 			padres.add(i,aux.get(i));
 		}
 		
@@ -327,8 +355,8 @@ public class SolucionGenetico {
 		
 		
 		for(int i = 0; i <pares.size(); i++) {
-			int posicion = 2;
-			//int posicion = (int) (Math.random()*((padres.get(pares.get(i).getX1()).getPaquetes().size())-1));
+			//int posicion = 2;
+			int posicion = (int) (Math.random()*((padres.get(pares.get(i).getX1()).getPaquetes().size())-1));
 			hijos.addAll(padres.get(pares.get(i).getX1()).cruce1(padres.get(pares.get(i).getX2())));
 			
 		}
@@ -337,7 +365,119 @@ public class SolucionGenetico {
 		
 	}
 	
-	public ArrayList<Encode> cruzamientoElite_Mutacion(float porcentajePadres, float porcentajeMutacion) {
+	public ArrayList<Encode> cruzamientoTorneo_Mutacion(ArrayList<Encode> padres, float porcentajeMutacion) {
+		ArrayList<Encode> hijos = new ArrayList<Encode>();
+		ArrayList<Pair> pares = new ArrayList<Pair>();
+		boolean flag = true;
+		int tamano = soluciones.size()/2;
+		int indice1 = 0;
+		int indice2 = 0;
+		Pair par;
+
+		indice1 = (int)(Math.random()*(padres.size()-1));
+		indice2 = (int)(Math.random()*(padres.size()-1));
+		
+		while(indice1 == indice2) {
+			indice2 = (int)(Math.random()*(padres.size()-1));
+		}
+		par= new Pair(indice1, indice2);
+		pares.add(par);
+		tamano--;
+		
+		while (tamano > 0) {
+			flag = true;
+			indice1 = (int)(Math.random()*(padres.size()-1));
+			indice2 = (int)(Math.random()*(padres.size()-1));
+			while(indice1 == indice2) {
+				indice2 = (int)(Math.random()*(padres.size()-1));
+			}
+			par= new Pair(indice1, indice2);
+			for(int i = 0; i < pares.size(); i++ ) {
+				if(pares.get(i).contiene(par)) {
+					flag = false;
+					break;
+				}
+				if(indice1 == indice2) {
+					flag = false;
+					break;
+				}
+			}
+			
+			if(flag) {
+				pares.add(par);
+				tamano--;
+			}
+			
+		}
+		
+		
+		for(int i = 0; i <pares.size(); i++) {
+			hijos.addAll(padres.get(pares.get(i).getX1()).cruce1(padres.get(pares.get(i).getX2())));
+		}
+		
+		
+		hijos = mutacion2(porcentajeMutacion, hijos);
+		hijos.addAll(padres);
+		return hijos;
+	}
+	
+	public ArrayList<Encode> cruzamientoElite_Mutacion(ArrayList<Encode> padres, float porcentajeMutacion) {
+		ArrayList<Encode> hijos = new ArrayList<Encode>();
+		ArrayList<Pair> pares = new ArrayList<Pair>();
+		boolean flag = true;
+		int tamano = soluciones.size()/2;
+		int indice1 = 0;
+		int indice2 = 0;
+		Pair par;
+
+		indice1 = (int)(Math.random()*(padres.size()-1));
+		indice2 = (int)(Math.random()*(padres.size()-1));
+		
+		while(indice1 == indice2) {
+			indice2 = (int)(Math.random()*(padres.size()-1));
+		}
+		par= new Pair(indice1, indice2);
+		pares.add(par);
+		tamano--;
+		
+		while (tamano > 0) {
+			flag = true;
+			indice1 = (int)(Math.random()*(padres.size()-1));
+			indice2 = (int)(Math.random()*(padres.size()-1));
+			while(indice1 == indice2) {
+				indice2 = (int)(Math.random()*(padres.size()-1));
+			}
+			par= new Pair(indice1, indice2);
+			for(int i = 0; i < pares.size(); i++ ) {
+				if(pares.get(i).contiene(par)) {
+					flag = false;
+					break;
+				}
+				if(indice1 == indice2) {
+					flag = false;
+					break;
+				}
+			}
+			
+			if(flag) {
+				pares.add(par);
+				tamano--;
+			}
+			
+		}
+		
+		
+		for(int i = 0; i <pares.size(); i++) {
+			hijos.addAll(padres.get(pares.get(i).getX1()).cruce1(padres.get(pares.get(i).getX2())));
+		}
+		
+		
+		hijos = mutacion2(porcentajeMutacion, hijos);
+		hijos.addAll(padres);
+		return hijos;
+	}
+	
+	public ArrayList<Encode> cruzamientoElite_Mutacion(float porcentajePadres, float porcentajeMutacion, boolean moga) {
 		ArrayList<Encode> padres = new ArrayList<Encode>();
 		ArrayList<Encode> hijos = new ArrayList<Encode>();
 		ArrayList<Pair> pares = new ArrayList<Pair>();
@@ -347,8 +487,12 @@ public class SolucionGenetico {
 		int indice2 = 0;
 		Pair par;
 
-
-		padres = seleccionElitista(porcentajePadres);
+		if(moga) {
+			padres = seleccionMoga(porcentajePadres);
+		}else {
+			padres = seleccionElitista(porcentajePadres);
+		}
+		
 		
 		indice1 = (int)(Math.random()*(padres.size()-1));
 		indice2 = (int)(Math.random()*(padres.size()-1));
@@ -402,7 +546,9 @@ public class SolucionGenetico {
 			if(muta <= porcentajeMutacion) {
 				Encode mutado = new Encode(idCiudad, presupuesto, kPaquetes, alfa);
 				mutado = soluciones.get(i).mutacion2();
-				
+				if(mutado.getSimilitud().size()>10) {
+					System.out.println("ayura");
+				}
 				//if(mutado.fitness()>= soluciones.get(i).fitness()) {
 					soluciones.set(i, mutado);
 				//}
@@ -421,6 +567,9 @@ public class SolucionGenetico {
 				Encode mutado = new Encode(idCiudad, presupuesto, kPaquetes, alfa);
 				mutado = hijos.get(i).mutacion2();
 				
+				if(!mutado.revisarSimilitud()) {
+					System.out.println("ayura");
+				}
 				//if(mutado.fitness()>= soluciones.get(i).fitness()) {
 					hijos.set(i, mutado);
 				//}
@@ -437,13 +586,47 @@ public class SolucionGenetico {
 		//soluciones = cruzamiento(porcentajePadres, seleccion, iter);
 	
 		soluciones = seleccionElitista(0.5f);
-		mutacion(porcentajeMutacion);
+		//mutacion(porcentajeMutacion);
 		
 		
 	}
 	
+	public void actualizarSolucionesNSGA2(ArrayList<Encode> padres, float porcentajeMutacion) {
+		soluciones.addAll(cruzamientoElite_Mutacion(padres, porcentajeMutacion));
+	}
+	
 	public void actualizarSolucionesNSGA(float porcentajePadres, int seleccion, float porcentajeMutacion, int iter) {
-		soluciones.addAll(cruzamientoElite_Mutacion(porcentajePadres, porcentajeMutacion));
+		soluciones.addAll(cruzamientoElite_Mutacion(porcentajePadres, porcentajeMutacion, false));
+	}
+	
+	public void actualizarSolucionesMOGA(float porcentajePadres, int seleccion, float porcentajeMutacion, int iter) {
+		soluciones = cruzamientoElite_Mutacion(porcentajePadres, porcentajeMutacion, true);
+	}
+	
+	public boolean borrarNSoluciones(int n) {
+		if(n>soluciones.size()) {
+			return false;
+		}
+		
+		for(int i = 0; i < n; i++) {
+			int index = (int)(Math.random()*(soluciones.size()-1));
+			soluciones.remove(index);
+		}
+		
+		return true;
+	}
+	
+	public boolean borrarNPeoresSoluciones(int n) {
+		if(n>soluciones.size()) {
+			return false;
+		}
+		ordenarLista(soluciones);
+		
+		for(int i = n-1; i >= 0; i--) {
+			soluciones.remove(i);
+		}
+		
+		return true;
 	}
 	
 	public Encode mejorSolucion() {
@@ -480,6 +663,8 @@ public class SolucionGenetico {
 			}
 		}
 	}
+	
+	
 	
 	public void ordenarListaIntra(ArrayList<Encode> lista) {
 		

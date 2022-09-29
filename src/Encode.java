@@ -247,6 +247,28 @@ public class Encode extends Solucion{
 	}
 	
 	/**
+	 * public float compatibilidad(){
+		float compatibilidad=0;
+		int tamano=paquete.size();
+		int idRestauranteAComparar;
+                //int h=0;
+		
+		//suma las compatibilidades de los restaurantes
+		for(int i =0;i<tamano;i++){
+			idRestauranteAComparar=paquete.get(i).getIdresturant();
+			for (int j = i+1 ; j < tamano; j++) {
+                                //h=h+1;
+				compatibilidad=compatibilidad + paquete.get(j).searchCompatInstersection(idRestauranteAComparar);
+				//System.out.println(paquete.get(j).searchCompatInstersection(idRestauranteAComparar));		
+			}		
+                        
+		}
+                //System.out.println(h);
+		return compatibilidad;
+	}
+	 */
+	
+	/**
 	 * Entrega compatibildiad entre paquetes
 	 */
 	public float inter() {
@@ -347,8 +369,8 @@ public class Encode extends Solucion{
 		hijo1.setSimilitud((ArrayList<Float>)padre1.getSimilitud().clone());
 		hijo1.setDiversidad((ArrayList<ArrayList<Float>>)padre1.diversidad.clone());
 		
-		hijo2.setGen(getGen());
-		hijo2.setRestaurantes(restaurantes);
+		hijo2.setGen((ArrayList<ArrayList<Integer>>)getGen().clone());
+		hijo2.setRestaurantes(getRestaurantes());
 		hijo2.setGasto((ArrayList<Integer>)gasto.clone());
 		hijo2.setTiposCocina((ArrayList<ArrayList<Integer>>)tiposCocina.clone());
 		hijo2.setSimilitud((ArrayList<Float>)similitud.clone());
@@ -371,6 +393,14 @@ public class Encode extends Solucion{
 		
 		hijo1.fitness();
 		hijo2.fitness();
+		
+		if(!hijo1.revisarSimilitud()) {
+			System.out.println("ayura cruce1");
+		}
+		
+		if(!hijo2.revisarSimilitud()) {
+			System.out.println("ayura cruce2");
+		}
 		
 		hijos.add(hijo1);
 		hijos.add(hijo2);
@@ -424,7 +454,7 @@ public class Encode extends Solucion{
 			mutado.agregarRestauranteFuerza(restaurantes.getRestaurante(columna), fila);
 		}
 		
-		fitness();
+		mutado.fitness();
 		return mutado; 
 	
 	}
@@ -478,10 +508,23 @@ public class Encode extends Solucion{
 		}else {
 			mutado.agregarRestauranteFuerza(restaurantes.getRestaurante(columna), fila);
 		}
+		if(!mutado.revisarSimilitud()) {
+			System.out.println("la cague");
+		}
+		
 		
 		fitness();
 		return mutado; 
 	
+	}
+	
+	public boolean revisarSimilitud() {
+		for(int i = 0; i <gen.size();i++) {
+			if(gen.get(i).size()>presupuesto/10) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/*
@@ -961,7 +1004,32 @@ public class Encode extends Solucion{
 		this.diversidad = diversidad;
 	}
 	
+	public boolean sonIguales(Encode aComparar) {
+		return false;
+	}
 	
+	public float getIntra() {
+		return intra;
+	}
+
+	public void setIntra(float intra) {
+		this.intra = intra;
+	}
+
+	public float getInter() {
+		return inter;
+	}
+
+	public void setInter(float inter) {
+		this.inter = inter;
+	}
+
+	public boolean mismoFitness(Encode aComparar) {
+		if((intra == aComparar.getIntra()) && (inter == aComparar.getInter())) {
+			return true;
+		}
+		return false;
+	}
 
 
 }
