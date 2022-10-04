@@ -400,6 +400,7 @@ public class MultiObjetiveAlgorithm extends Algorithm{
         return Fronts; 
     }
     
+    
     public ArrayList<Encode> pareto(SolucionGenetico poblation){
     	
     	ArrayList<Encode> P = poblation.getSoluciones();
@@ -485,6 +486,7 @@ public class MultiObjetiveAlgorithm extends Algorithm{
 		
 		for(ArrayList<Encode> Front: clasificacionFronteras(P)) {
 			for(Encode s: Front) {
+				
 				padres.add(s);
 				if(padres.size()==cantidad) {
 					flag = true;
@@ -500,6 +502,33 @@ public class MultiObjetiveAlgorithm extends Algorithm{
 		
 		return padres;
     }
+    
+    public ArrayList<Encode> SeleccionElitistaMO2(SolucionGenetico P, float porcentaje){
+    	ArrayList<Encode> padres = new ArrayList<Encode>();
+		int cantidad;
+		float div = porcentaje;
+		boolean flag = false;
+		cantidad = (int) (P.getSoluciones().size()*(div));
+		
+		for(ArrayList<Encode> Front: clasificacionFronteras(P)) {
+			if(Front.size()>cantidad-padres.size()) {
+				ordenarPorDistancia(Front);
+			}
+			for(Encode s: Front) {
+				padres.add(s);
+				if(padres.size()==cantidad) {
+					flag = true;
+					break;
+				}
+			}
+			if(flag) {
+				break;
+			}
+		}
+		
+		return padres;
+    }
+    
     public ArrayList<Encode> SeleccionRandomMO(SolucionGenetico P, float porcentaje){
     	ArrayList<Encode> padres = new ArrayList<Encode>();
 		int cantidad;
@@ -699,7 +728,8 @@ public class MultiObjetiveAlgorithm extends Algorithm{
      		int i = 0;
      		//actual.actualizarSolucionesNSGA2(SeleccionElitistaMO(actual, porcentajePadres), porcentajeMutacion);
      		//actual.actualizarSolucionesNSGA2(SeleccionTorneoMO(actual, porcentajePadres), porcentajeMutacion);
-     		actual.actualizarSolucionesNSGA2(SeleccionRandomMO(actual, porcentajePadres), porcentajeMutacion);
+     		//actual.actualizarSolucionesNSGA2(SeleccionRandomMO(actual, porcentajePadres), porcentajeMutacion);
+     		actual.actualizarSolucionesNSGA2(SeleccionElitistaMO2(actual, porcentajePadres), porcentajeMutacion);
      		
      		fronteras = clasificacionFronteras(actual);
      		while(soluciones.size()+fronteras.get(i).size() <= numPoblacion ) {

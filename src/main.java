@@ -40,7 +40,7 @@ public class main {
         
         //de manera que se puedan correr varias pruebas a la vez
         float[] ganmas={(float) 0.5};
-        int[] presupuestos= {100}; 
+        int[] presupuestos= {50}; 
         int[] funcions= {69}; 
         int kpaquetes=10;//cantidad de paquetes
         int iter=10;
@@ -100,7 +100,7 @@ public class main {
         	        //poner ciudad < 122
         	        
         	        long actualTime=System.currentTimeMillis();
-			        for(ciudad=76;ciudad<77;ciudad++){
+			        for(ciudad=1;ciudad<2;ciudad++){
 			        	Excel solucion = new Excel();
 			        	Excel resultados = new Excel();
 			        	System.out.println("ciudad: "+ ciudad);
@@ -114,7 +114,6 @@ public class main {
 			            	
 			            	if(funcion == 69) {
 			            		String h = "Pareto " + Integer.toString(i+1);
-			            		String excel = "NSGAII Random 50 "; 
 			            		solucion.crearHoja(h);
 			            		ArrayList<Encode> sol = multiAlgorithm.NSGAII(ciudad, listaPrueba, 0.2f, 2, 0.8f);
 			            		String[][] table = new String[sol.size()+1][];
@@ -130,7 +129,7 @@ public class main {
 			            			solucion.escribirFila(table[j+1]);
 			           
 			            		}
-			            		solucion.GuardarExcel(excel);
+			            		
 			            		for (String[] row : table) {
 			                        System.out.format("%15s %15s %n", row);
 			                    }
@@ -478,6 +477,7 @@ public class main {
 			            }
 			            
 			            resultados.GuardarExcel("Moga Elite 100");
+			            solucion.GuardarExcel("NSGAII Elitista 2 50 ciudad 1");
 			            
 			        }
 			        actualTime = System.currentTimeMillis()-actualTime;
